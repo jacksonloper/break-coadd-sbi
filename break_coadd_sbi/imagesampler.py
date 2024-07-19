@@ -6,6 +6,7 @@ import dataclasses
 import math
 import torch
 from .lanczos import lanczos_interp
+from .badcolumns import make_bad_column
 
 def place_gaussian_bumps(plocs,fluxes,xx,yy,psf_h,psf_w):
     """Place gaussian bumps down on an image grid with coordinates defined
@@ -99,6 +100,9 @@ class ImageSampler:
     # whether to include translation artifacts
     translation_artifacts: bool = True
 
+    # whether to include bad column artifacts
+    bad_column_artifacts: bool = False
+
     # coadd depth
     coadd_depth: int = 5
 
@@ -157,6 +161,10 @@ class ImageSampler:
                 torch.sqrt(brightness * self.ccd_b + self.ccd_c),
                 generator=generator,
             )
+
+            # mask bad column if option is true
+            if self.bad_column_artifacts:
+                rendering = make_bad_column(rendering, generator)
 
             # if the CCD was offset, then we have to
             # shift it back into the right coordinates
