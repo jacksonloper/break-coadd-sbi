@@ -7,6 +7,7 @@ import math
 import torch
 from .lanczos import lanczos_interp
 from .badcolumns import make_bad_column
+from .cosmicray import generate_cosmic_ray
 
 def place_gaussian_bumps(plocs,fluxes,xx,yy,psf_h,psf_w):
     """Place gaussian bumps down on an image grid with coordinates defined
@@ -103,6 +104,9 @@ class ImageSampler:
     # whether to include bad column artifacts
     bad_column_artifacts: bool = False
 
+    # whether to include cosmic ray artifacts
+    cosmic_ray_artifacts: bool = False
+
     # coadd depth
     coadd_depth: int = 5
 
@@ -165,6 +169,10 @@ class ImageSampler:
             # mask bad column if option is true
             if self.bad_column_artifacts:
                 rendering = make_bad_column(rendering, generator)
+
+            # mask cosmic rays if option is true
+            if self.cosmic_ray_artifacts:
+                rendering = generate_cosmic_ray(rendering, generator)
 
             # if the CCD was offset, then we have to
             # shift it back into the right coordinates
